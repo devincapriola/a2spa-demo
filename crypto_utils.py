@@ -5,6 +5,12 @@ import os
 KEY_DIR = "keys"
 os.makedirs(KEY_DIR, exist_ok=True)
 
+def ensure_keys_exist(agent_name):
+    priv_path = f"{KEY_DIR}/{agent_name}_private.pem"
+    pub_path = f"{KEY_DIR}/{agent_name}_public.pem"
+    if not os.path.exists(priv_path) or not os.path.exists(pub_path):
+        generate_keys(agent_name)
+
 def generate_keys(agent_name):
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public_key = private_key.public_key()
@@ -23,6 +29,7 @@ def generate_keys(agent_name):
         ))
 
 def load_keys(agent_name):
+    ensure_keys_exist(agent_name)
     with open(f"{KEY_DIR}/{agent_name}_private.pem", "rb") as f:
         private_key = serialization.load_pem_private_key(f.read(), password=None)
     with open(f"{KEY_DIR}/{agent_name}_public.pem", "rb") as f:
